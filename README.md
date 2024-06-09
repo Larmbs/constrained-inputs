@@ -27,8 +27,8 @@ use constrained_inputs::{constrained_input, constraints::NumberConstraint};
 
 fn main() {
     let constraint = NumberConstraint {
-        max_size: Some(100),
-        min_size: Some(10),
+        max: Some(100),
+        min: Some(10),
     };
     let int: i32 = constrained_input(constraint).expect("Input was invalid or out of range");
     println!("Your constrained input integer: {}", int);
@@ -64,8 +64,8 @@ use constrained_inputs::constraints::{NumberConstraint, Constraint, ConstraintRe
 
 fn main() {
     let number_constraint = NumberConstraint {
-        max_size: Some(100),
-        min_size: Some(10),
+        max: Some(100),
+        min: Some(10),
     };
 
     let result = number_constraint.validate(&50);
