@@ -3,6 +3,7 @@ name = "constrained-inputs"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
+description = "A crate to constrain io inputs"
 
 [dependencies]
 lazy_static = "1.4.0"
