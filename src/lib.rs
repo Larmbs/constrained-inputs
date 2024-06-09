@@ -49,14 +49,14 @@ where
 }
 
 /// Result type for constraints
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ConstraintResult {
     Valid,
     Err(ConstraintError),
 }
 
 /// Error types for constraints
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ConstraintError {
     InvalidConstraint,
     TooLarge,
@@ -72,9 +72,9 @@ pub trait Constraint<T> {
 }
 /// String constraint config for applying constraints to what a string can be
 pub struct StringConstraint {
-    max_len: Option<usize>,
-    min_len: Option<usize>,
-    blacklist_chars: Vec<char>,
+    pub max_len: Option<usize>,
+    pub min_len: Option<usize>,
+    pub blacklist_chars: Vec<char>,
 }
 /// Implementing method to apply constraints
 impl<T> Constraint<T> for StringConstraint
@@ -106,16 +106,20 @@ where
 
 /// Number constraint config for applying constraints onto some number
 pub struct NumberConstraint {
-    max_size: Option<isize>,
-    min_size: Option<isize>,
+    pub max_size: Option<i32>,
+    pub min_size: Option<i32>,
 }
 /// Applying constraint trait to determine if data is valid
 impl<T> Constraint<T> for NumberConstraint
 where
-    T: Into<isize> + Clone + PartialOrd,
+    T: Into<i32> + Clone + PartialOrd,
 {
     fn validate(&self, data: &T) -> ConstraintResult {
-        let data: isize = data.clone().into();
+        let res = i32::try_from(data.clone()).map_err(|_| ConstraintError::InvalidConstraint);
+        if let Err(err) = res {
+            return ConstraintResult::Err(err);
+        }
+        let data = res.unwrap();
 
         if let Some(max_size) = self.max_size {
             if data > max_size {
@@ -129,5 +133,51 @@ where
         }
 
         ConstraintResult::Valid
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn string_constraints_test1() {
+        let string_constraint = StringConstraint {
+            max_len: Some(20),
+            min_len: Some(2),
+            blacklist_chars: vec!['a', 'b']
+        };
+
+        let input = "Hello my name is dog"; // Should fail, has the letter A
+
+        assert_ne!(ConstraintResult::Valid, string_constraint.validate(&input));
+
+        let input = String::from("This is another sentence that is too long and has blacklisted chars");
+
+        assert_ne!(ConstraintResult::Valid, string_constraint.validate(&input));
+    }
+
+    #[test]
+    fn number_constraint() {
+        let number_constraint = NumberConstraint {
+            max_size: Some(20),
+            min_size: Some(-10),
+        };
+
+        let input: u8 = 15;
+
+        assert_eq!(ConstraintResult::Valid, number_constraint.validate(&input));
+
+        let input: u16 = 50;
+
+        assert_ne!(ConstraintResult::Valid, number_constraint.validate(&input));
+
+        let input: i16 = 50;
+
+        assert_ne!(ConstraintResult::Valid, number_constraint.validate(&input));
+        
+        let input: i32 = -1000;
+
+        assert_ne!(ConstraintResult::Valid, number_constraint.validate(&input));
     }
 }
