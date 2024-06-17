@@ -1,13 +1,13 @@
 //! Crate for easy input parsing and prompting.
-//! 
+//!
 //! This crate allows for easy input constraints, making it simpler to handle user input
 //! with specific type constraints and validations.
-//! 
+//!
 //! # Example
-//! 
+//!
 //! ```
 //! use constrained_inputs::input;
-//! 
+//!
 //! fn main() {
 //!     let int = input::<i32>().expect("Input was invalid");
 //!     println!("Your input integer: {}", int);
@@ -37,20 +37,20 @@ where
 }
 
 /// This function is able to take in an input with a type constraint.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```
 /// use constrained_inputs::input;
-/// 
+///
 /// fn main() {
 ///     let int = input::<i32>().expect("Input was invalid");
 ///     println!("Your input integer: {}", int);
 /// }
 /// ```
-/// 
+///
 /// # Errors
-/// 
+///
 /// This function returns an `InputError` if the input is invalid, if a parsing error occurs,
 /// or if the input does not meet the specified constraints.
 pub fn input<T>() -> Result<T, InputError<T>>
@@ -61,13 +61,13 @@ where
 }
 
 /// Reads an input from a `BufRead` reader.
-/// 
+///
 /// # Errors
-/// 
+///
 /// This function returns an `InputError` if the input is invalid, if a parsing error occurs,
 /// or if the input does not meet the specified constraints.
 pub fn input_stream<T, R>(mut reader: R) -> Result<T, InputError<T>>
-where 
+where
     R: io::BufRead,
     T: std::str::FromStr,
 {
@@ -82,27 +82,27 @@ where
 }
 
 /// Prompts user input in the terminal with an added type constraint.
-/// 
+///
 /// # WARNING
 /// Make sure that the constraint provided is of the same type as the one you expect.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```
 /// use constrained_inputs::{constrained_input, NumberConstraint};
-/// 
+///
 /// fn main() {
 ///     let constraint = NumberConstraint{
-///         max: Some(20), 
+///         max: Some(20),
 ///         min: Some(10),
 ///     };
 ///     let int = constrained_input::<i32, _>(constraint).expect("Input was invalid or out of range");
 ///     println!("Your constrained input integer: {}", int);
 /// }
 /// ```
-/// 
+///
 /// # Errors
-/// 
+///
 /// This function returns an `InputError` if the input is invalid, if a parsing error occurs,
 /// or if the input does not meet the specified constraints.
 pub fn constrained_input<T, C>(constraint: C) -> Result<T, InputError<T>>

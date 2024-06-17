@@ -1,29 +1,29 @@
 //! Module with constraint configs to apply to inputs
-//! 
+//!
 //! This module provides various constraints that can be applied to user inputs,
 //! including constraints for strings and numbers. These constraints help ensure that
 //! input data meets specific criteria before it is accepted.
-//! 
+//!
 //! # Example
-//! 
+//!
 //! ```
 //! use constrained_inputs::constraints::{StringConstraint, NumberConstraint, Constraint};
-//! 
+//!
 //! fn main() {
 //!     let string_constraint = StringConstraint {
 //!         max_len: Some(10),
 //!         min_len: Some(5),
 //!         blacklist_chars: vec!['a', 'e', 'i', 'o', 'u'],
 //!     };
-//! 
+//!
 //!     let result = string_constraint.validate(&"hello");
 //!     assert_eq!(result, ConstraintResult::Err(ConstraintError::BlacklistedChar));
-//! 
+//!
 //!     let number_constraint = NumberConstraint {
 //!         max: Some(100),
 //!         min: Some(10),
 //!     };
-//! 
+//!
 //!     let result = number_constraint.validate(&50);
 //!     assert_eq!(result, ConstraintResult::Valid);
 //! }
@@ -68,20 +68,14 @@ where
     fn validate(&self, data: &T) -> ConstraintResult {
         let data = data.as_ref();
 
-        if let Some(max_len) = self.max_len {
-            if data.len() > max_len {
-                return ConstraintResult::Err(ConstraintError::TooLong);
-            }
+        if self.max_len.map_or(false, |max_len| data.len() > max_len) {
+            return ConstraintResult::Err(ConstraintError::TooLong);
         }
-        if let Some(min_len) = self.min_len {
-            if data.len() < min_len {
-                return ConstraintResult::Err(ConstraintError::TooShort);
-            }
+        if self.min_len.map_or(false, |min_len| data.len() < min_len) {
+            return ConstraintResult::Err(ConstraintError::TooShort);
         }
-        for ch in data.chars() {
-            if self.blacklist_chars.contains(&ch) {
-                return ConstraintResult::Err(ConstraintError::BlacklistedChar);
-            }
+        if data.chars().any(|ch| self.blacklist_chars.contains(&ch)) {
+            return ConstraintResult::Err(ConstraintError::BlacklistedChar);
         }
 
         ConstraintResult::Valid
@@ -100,23 +94,17 @@ where
     T: Into<i32> + Clone + PartialOrd,
 {
     fn validate(&self, data: &T) -> ConstraintResult {
-        let res = i32::try_from(data.clone()).map_err(|_| ConstraintError::InvalidConstraint);
-        if let Err(err) = res {
-            return ConstraintResult::Err(err);
-        }
-        let data = res.unwrap();
-
-        if let Some(max) = self.max {
-            if data > max {
-                return ConstraintResult::Err(ConstraintError::TooLarge);
+        match i32::try_from(data.clone()) {
+            Ok(data) => {
+                if self.max.map_or(false, |max| data > max) {
+                    ConstraintResult::Err(ConstraintError::TooLarge)
+                } else if self.min.map_or(false, |min| data < min) {
+                    ConstraintResult::Err(ConstraintError::TooSmall)
+                } else {
+                    ConstraintResult::Valid
+                }
             }
+            Err(_) => ConstraintResult::Err(ConstraintError::InvalidConstraint),
         }
-        if let Some(min) = self.min {
-            if data < min {
-                return ConstraintResult::Err(ConstraintError::TooSmall);
-            }
-        }
-
-        ConstraintResult::Valid
     }
 }
