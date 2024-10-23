@@ -2,6 +2,8 @@
 
 CInputs is a Rust library designed for easy input parsing with built-in constraints. It provides functionality for reading user input and applying various constraints to ensure the validity of that input.
 
+This is the successor to [constrained_inputs crate](https://crates.io/crates/constrained-inputs)
+
 ## Features
 
 - **Simple Input Parsing**: Easily read user input as different types (e.g., integers, strings).
