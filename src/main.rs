@@ -1,5 +1,3 @@
-use std::usize;
-
 use cinputs::prelude::*;
 
 fn main() {
