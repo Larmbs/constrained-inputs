@@ -1,6 +1,6 @@
 [package]
 name = "cinputs"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 license = "MIT"
 description = "Crate that simplifies the constraining of inputs"

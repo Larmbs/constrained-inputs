@@ -10,7 +10,7 @@ CInputs is a Rust library designed for easy input parsing with built-in constrai
 
 ## Example Usage
 Here is a quick example of using input() and cinput().
-```Rust
+```rust
 use cinputs::prelude::*;
 
 fn main() {
