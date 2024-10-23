@@ -44,7 +44,7 @@ where
     <T as str::FromStr>::Err: std::fmt::Display,
 {
     string.parse::<T>().map_err(|err| Error {
-        kind: ErrorKind::IOError,
+        kind: ErrorKind::ValidationError,
         message: err.to_string(),
     })
 }
