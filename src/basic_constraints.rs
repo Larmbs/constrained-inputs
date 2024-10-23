@@ -4,10 +4,10 @@ use crate::error::{Error, ErrorKind, Result};
 
 /// Simple constraint to be applied on Strings
 pub struct StringConstraint {
-    exclude_char: Vec<char>,
-    include_char: Vec<char>,
-    max_len: usize,
-    min_len: usize,
+    pub exclude_char: Vec<char>,
+    pub include_char: Vec<char>,
+    pub max_len: usize,
+    pub min_len: usize,
 }
 
 impl Constraint<String> for StringConstraint {
@@ -45,7 +45,7 @@ impl Constraint<String> for StringConstraint {
 
         // Check for included characters
         for chr in &self.include_char {
-            if !data.contains(*chr) {
+            if !data.contains(&chr.to_string()) {
                 return Err(Error {
                     kind: ErrorKind::ValidationError,
                     message: format!("String must contain the character '{}'.", chr),
@@ -59,8 +59,8 @@ impl Constraint<String> for StringConstraint {
 
 /// Simple constraint to apply to numbers
 pub struct NumberConstraint {
-    min_value: f64,
-    max_value: f64,
+    pub min_value: f64,
+    pub max_value: f64,
 }
 
 impl<T> Constraint<T> for NumberConstraint

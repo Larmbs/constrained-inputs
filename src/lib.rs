@@ -3,13 +3,13 @@ use core::str;
 use lazy_static::lazy_static;
 use std::io::{self, BufRead};
 
+pub mod basic_constraints;
 pub mod constraints;
 pub mod error;
-pub mod basic_constraints;
 pub mod prelude;
 
 use constraints::*;
-use error::{Error, Result, ErrorKind};
+use error::{Error, ErrorKind, Result};
 
 lazy_static! {
     /// Constant reference to Stdin reader
@@ -74,7 +74,7 @@ where
         message: err.to_string(),
     })?;
 
-    string_input(&buf)
+    string_input(&buf.trim().to_string())
 }
 
 /// Read from a BufReader one line, string is parsed into T, then a constraint is applied

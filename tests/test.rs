@@ -1,6 +1,4 @@
 use cinputs::prelude::*;
 
 #[test]
-fn test_string_input() {
-    
-}
+fn test_string_input() {}
