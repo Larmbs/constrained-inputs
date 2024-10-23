@@ -6,7 +6,7 @@ license = "MIT"
 description = "Crate that simplifies the constraining of inputs"
 categories = ["input", "parsing", "types"]
 documentation = "https://docs.rs/cinputs/latest/cinputs/"
-keywords = ["input", "cinput", "types", "parsing"]
+keywords = ["parsing", "user-input]
 repository = "https://github.com/Larmbs/constrained-inputs"
 
 [dependencies]
