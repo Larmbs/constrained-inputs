@@ -1,121 +1,95 @@
-//! Crate for easy input parsing and prompting.
-//!
-//! This crate allows for easy input constraints, making it simpler to handle user input
-//! with specific type constraints and validations.
-//!
-//! # Example
-//!
-//! ```
-//! use constrained_inputs::input;
-//!
-//! fn main() {
-//!     let int = input::<i32>().expect("Input was invalid");
-//!     println!("Your input integer: {}", int);
-//! }
-//! ```
-
+//! Crate for easy import parsing and constraint applying
+use core::str;
 use lazy_static::lazy_static;
-use std::io;
+use std::io::{self, BufRead};
 
-mod constraints;
-pub use constraints::*;
+pub mod constraints;
+pub mod error;
+pub mod basic_constraints;
+pub mod prelude;
 
-// Just a method to avoid creating multiple stdin objects
+use constraints::*;
+use error::{Error, Result, ErrorKind};
+
 lazy_static! {
+    /// Constant reference to Stdin reader
     static ref IO_IN: io::Stdin = io::stdin();
 }
 
-/// Error gotten either when input is invalid or some I/O error occurs
-#[derive(Debug)]
-pub enum InputError<T>
+/// Read from Stdin, string is parsed into T
+pub fn input<T>() -> Result<T>
 where
     T: std::str::FromStr,
+    <T as str::FromStr>::Err: std::fmt::Display,
 {
-    IoError(io::Error),
-    ParseError(T::Err),
-    BreaksConstraint(ConstraintError),
+    read_stream(IO_IN.lock())
 }
 
-/// This function is able to take in an input with a type constraint.
-///
-/// # Example
-///
-/// ```
-/// use constrained_inputs::input;
-///
-/// fn main() {
-///     let int = input::<i32>().expect("Input was invalid");
-///     println!("Your input integer: {}", int);
-/// }
-/// ```
-///
-/// # Errors
-///
-/// This function returns an `InputError` if the input is invalid, if a parsing error occurs,
-/// or if the input does not meet the specified constraints.
-pub fn input<T>() -> Result<T, InputError<T>>
+/// Read from Stdin, string is parsed into T, then a constraint is applied
+pub fn cinput<T, C>(constraint: C) -> Result<T>
 where
     T: std::str::FromStr,
-{
-    input_stream(IO_IN.lock())
-}
-
-/// Reads an input from a `BufRead` reader.
-///
-/// # Errors
-///
-/// This function returns an `InputError` if the input is invalid, if a parsing error occurs,
-/// or if the input does not meet the specified constraints.
-pub fn input_stream<T, R>(mut reader: R) -> Result<T, InputError<T>>
-where
-    R: io::BufRead,
-    T: std::str::FromStr,
-{
-    let mut buf = String::new();
-    reader
-        .read_line(&mut buf)
-        .map_err(|io_err| InputError::IoError(io_err))?;
-    let input = buf.trim();
-    input
-        .parse::<T>()
-        .map_err(|parse_err| InputError::ParseError(parse_err))
-}
-
-/// Prompts user input in the terminal with an added type constraint.
-///
-/// # WARNING
-/// Make sure that the constraint provided is of the same type as the one you expect.
-///
-/// # Example
-///
-/// ```
-/// use constrained_inputs::{constrained_input, NumberConstraint};
-///
-/// fn main() {
-///     let constraint = NumberConstraint{
-///         max: Some(20),
-///         min: Some(10),
-///     };
-///     let int = constrained_input::<i32, _>(constraint).expect("Input was invalid or out of range");
-///     println!("Your constrained input integer: {}", int);
-/// }
-/// ```
-///
-/// # Errors
-///
-/// This function returns an `InputError` if the input is invalid, if a parsing error occurs,
-/// or if the input does not meet the specified constraints.
-pub fn constrained_input<T, C>(constraint: C) -> Result<T, InputError<T>>
-where
-    T: std::str::FromStr,
+    <T as str::FromStr>::Err: std::fmt::Display,
     C: Constraint<T>,
 {
-    let input = input()?;
-    match constraint.validate(&input) {
-        ConstraintResult::Valid => Ok(input),
-        ConstraintResult::Err(err) => Err(InputError::BreaksConstraint(err)),
-    }
+    let value = input()?;
+    constraint.validate(&value)?;
+    Ok(value)
 }
 
-#[cfg(test)]
-mod test;
+/// String is parsed into T
+pub fn string_input<T>(string: &String) -> Result<T>
+where
+    T: std::str::FromStr,
+    <T as str::FromStr>::Err: std::fmt::Display,
+{
+    string.parse::<T>().map_err(|err| Error {
+        kind: ErrorKind::IOError,
+        message: err.to_string(),
+    })
+}
+
+/// No no a CString, string is parsed into T, then a constraint is applied
+pub fn cstring_input<T, C>(string: &String, constraint: C) -> Result<T>
+where
+    T: std::str::FromStr,
+    <T as str::FromStr>::Err: std::fmt::Display,
+    C: Constraint<T>,
+{
+    let value: T = string_input(string)?;
+    constraint.validate(&value)?;
+    Ok(value)
+}
+
+/// Read from a BufReader one line, string is parsed into T
+pub fn read_stream<R, T>(mut reader: R) -> Result<T>
+where
+    R: BufRead,
+    T: std::str::FromStr,
+    <T as str::FromStr>::Err: std::fmt::Display,
+{
+    let mut buf = String::new();
+    reader.read_line(&mut buf).map_err(|err| Error {
+        kind: ErrorKind::IOError,
+        message: err.to_string(),
+    })?;
+
+    string_input(&buf)
+}
+
+/// Read from a BufReader one line, string is parsed into T, then a constraint is applied
+pub fn cread_stream<R, T, C>(mut reader: R, constraint: C) -> Result<T>
+where
+    R: BufRead,
+    T: std::str::FromStr,
+    <T as str::FromStr>::Err: std::fmt::Display,
+    C: Constraint<T>,
+{
+    let mut buf = String::new();
+    reader.read_line(&mut buf).map_err(|err| Error {
+        kind: ErrorKind::IOError,
+        message: err.to_string(),
+    })?;
+
+    cstring_input(&buf, constraint)
+}

@@ -1,9 +1,9 @@
 [package]
-name = "constrained-inputs"
-version = "0.1.2"
+name = "cinputs"
+version = "0.2.0"
 edition = "2021"
 license = "MIT"
-description = "A crate to constrain io inputs"
+description = "Crate that simplifies the constraining of inputs"
 
 [dependencies]
 lazy_static = "1.4.0"
