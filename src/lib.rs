@@ -50,7 +50,7 @@ where
 }
 
 /// No no a CString, string is parsed into T, then a constraint is applied
-pub fn cstring_input<T, C>(string: &String, constraint: C) -> Result<T>
+pub fn cstring_input<T, C>(string: &String, constraint: &C) -> Result<T>
 where
     T: std::str::FromStr,
     <T as str::FromStr>::Err: std::fmt::Display,
@@ -78,7 +78,7 @@ where
 }
 
 /// Read from a BufReader one line, string is parsed into T, then a constraint is applied
-pub fn cread_stream<R, T, C>(mut reader: R, constraint: C) -> Result<T>
+pub fn cread_stream<R, T, C>(mut reader: R, constraint: &C) -> Result<T>
 where
     R: BufRead,
     T: std::str::FromStr,

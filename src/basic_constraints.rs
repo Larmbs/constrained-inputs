@@ -12,10 +12,8 @@ pub struct StringConstraint {
 
 impl Constraint<String> for StringConstraint {
     fn validate(&self, data: &String) -> Result<()> {
-        let len = data.len();
-
         // Check minimum length
-        if len < self.min_len {
+        if self.min_len > data.len() {
             return Err(Error {
                 kind: ErrorKind::ValidationError,
                 message: format!("String must be at least {} characters long.", self.min_len),
@@ -23,7 +21,7 @@ impl Constraint<String> for StringConstraint {
         }
 
         // Check maximum length
-        if len > self.max_len {
+        if self.max_len < data.len() {
             return Err(Error {
                 kind: ErrorKind::ValidationError,
                 message: format!(

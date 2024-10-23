@@ -1,9 +1,13 @@
 [package]
 name = "cinputs"
-version = "0.2.3"
+version = "0.2.5"
 edition = "2021"
 license = "MIT"
 description = "Crate that simplifies the constraining of inputs"
+categories = ["input", "parsing", "types"]
+documentation = "https://docs.rs/cinputs/latest/cinputs/"
+keywords = ["input", "cinput", "types", "parsing]
+repository = "https://github.com/Larmbs/constrained-inputs"
 
 [dependencies]
 lazy_static = "1.4.0"
